@@ -38,8 +38,8 @@ def gc_content(seq):
             gc_count += 1
     return gc_count / len(seq)
 
-gc = gc_content(input_sequence)
 
+gc = gc_content(input_sequence)
 
 if __name__ == '__main__':
     main()

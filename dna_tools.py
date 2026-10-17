@@ -38,11 +38,28 @@ def gc_content(seq):
             gc_count += 1
     return gc_count / len(seq)
 
-
 gc = gc_content(input_sequence)
+
+def find_pam_sites(seq):
+    seq = seq.upper()
+    sites = []
+    for i in range(len(seq) - 2):
+        chunk = seq[i:i+3]
+        if chunk.endswith("GG"):
+            sites.append(i)
+    return sites
+
+
+
+
+print(find_pam_sites("AATGGCC"))   # [2]
+print(find_pam_sites("AGGTGG"))    # [0, 3]
+print(find_pam_sites("aggtgg"))    # [0, 3]
+print(find_pam_sites("AAAA"))      # []
 
 if __name__ == '__main__':
     main()
+
 
 
 

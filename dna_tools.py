@@ -41,20 +41,8 @@ def gc_content(seq):
 gc = gc_content(input_sequence)
 
 
+if __name__ == '__main__':
+    main()
 
-
-
-
-
-
-print("The ratio of the GC content in the whole sequence is:", str(gc))
-print(gc_content("ATGC"))    # 0.5
-print(gc_content("AAAA"))    # 0.0
-print(gc_content("GGCC"))    # 1.0
-print(gc_content(""))        # no crash
-print(gc_content("ATGCCG"))  # 0.6666...
-print(gc_content(""))       # 0.0
-print(gc_content("gcgc"))   # 1.0
-print(reverse_complement("aaaa"))  # TTTT
 
 

@@ -49,6 +49,20 @@ def find_pam_sites(seq):
             sites.append(i)
     return sites
 
+def find_guides(seq):
+    seq = seq.upper()
+    guides = []
+    for i in find_pam_sites(seq):
+        guide = (seq[i-20:i])
+        guides.append(guide)
+    return guides 
+
+def find_all_guides(seq):
+    forward =find_guides(seq)
+    reverse = find_guides(reverse_complement(seq))
+    return forward + reverse
+    
+
 
 print(find_pam_sites("AATGGCC"))   # [2]
 print(find_pam_sites("AGGTGG"))    # [0, 3]

@@ -43,19 +43,21 @@ gc = gc_content(input_sequence)
 def find_pam_sites(seq):
     seq = seq.upper()
     sites = []
-    for i in range(len(seq) - 2):
+    for i in range(20, len(seq) - 2): # 20 is always used is because the guide RNA cas9 uses is always 20 letters long.
         chunk = seq[i:i+3]
         if chunk.endswith("GG"):
             sites.append(i)
     return sites
 
 
-
-
 print(find_pam_sites("AATGGCC"))   # [2]
 print(find_pam_sites("AGGTGG"))    # [0, 3]
 print(find_pam_sites("aggtgg"))    # [0, 3]
 print(find_pam_sites("AAAA"))      # []
+print(find_pam_sites("A" * 20 + "TGG"))            # [20]
+print(find_pam_sites("A" * 20 + "TGGAGG"))         # [20, 23]
+print(find_pam_sites("TGG" + "A" * 20 + "TGG"))    # [23]  (the first TGG has no room)
+print(find_pam_sites("AGGTGG"))                    # []    (too short)
 
 if __name__ == '__main__':
     main()

@@ -101,16 +101,32 @@ def count_mismatches(a,b): # Compares sequences "A" and "B", and counts the no. 
 def weighted_mismatches(a,b): # Index 0-19 works as a "target" as there are usually 20 bases next to PAM(NGG.) What this does is showos how far it is from the pam via weight.
     if len(a) != len(b):
         raise ValueError("The length of a should be equal to the length of b.") 
-    weighed_mismatches = 0
+    penalty = 0
     for i in range(len(a)):
         if a[i] != b[i]:
             if i >= 10:
-                weighed_mismatches += 2
+               penalty += 2
             else:
-                weighed_mismatches +=1
-    return weighed_mismatches
+                penalty += 1
+    return penalty
+
+def scan_for_matches(guide,genome,max_penalty):
+    genome = genome.upper()
+    hits = []
+    for i in range(len(genome) - 19):
+        window = genome[i:i+20]
+        penalty = weighted_mismatches(guide,window)
+        if penalty <= max_penalty:
+            hits.append((i,penalty))
+    return hits 
 
 
+guide = "A" * 20
+genome = "C" * 5 + "A" * 20 + "C" * 5
+
+print(scan_for_matches(guide, genome, 0))   # [(5, 0)]
+print(scan_for_matches(guide, genome, 1))   # [(4, 1), (5, 0)]
+print(scan_for_matches(guide, "AAAA", 0))   # []
 # print(count_mismatches("ACGT","AC"))              gi
 print(count_mismatches("ACGT", "AGGT"))              # 1
 print(count_mismatches("AAAA", "TTTT"))              # 4

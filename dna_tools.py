@@ -89,6 +89,19 @@ test = "ACGT" * 5 + "TGG" + "A" * 20 + "AGG"
 for guide, score in rank_guides(test):
     print(guide,score)
 
+def count_mismatches(a,b): # Compares sequences "A" and "B", and counts the no. of mismatches between them
+    mismatches = 0
+    for i in range(len(a)):
+        if a[i] != b[i]:
+            mismatches += 1
+    return mismatches 
+
+print(count_mismatches("ACGT", "ACGT"))              # 0
+print(count_mismatches("ACGT", "AGGT"))              # 1
+print(count_mismatches("AAAA", "TTTT"))              # 4
+print(count_mismatches("ACGTACGTAC", "ACGTTCGTAA"))  # 2
+
+
 if __name__ == '__main__':
     main()
 

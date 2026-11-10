@@ -76,17 +76,18 @@ def score_guide(guide):
     if 0.4 <= gc_content(guide) <= 0.7: # If the gc content is below 40%, the bind target is weak, and if its above 70% it binds too tightly. hence, we need it within this sweet spot.
         score +=1
     return score 
-    
 
+def rank_guides(seq):
+    results = []
+    for guide in find_all_guides(seq):
+        results.append((guide, score_guide(guide))) # runs for each guide
+    results.sort(key= lambda pair: pair[1], reverse = True) #after loop, runs once, lambda just is a easier way for me to return pair[1]
+    return results 
 
-print(find_pam_sites("AATGGCC"))   # [2]
-print(find_pam_sites("AGGTGG"))    # [0, 3]
-print(find_pam_sites("aggtgg"))    # [0, 3]
-print(find_pam_sites("AAAA"))      # []
-print(find_pam_sites("A" * 20 + "TGG"))            # [20]
-print(find_pam_sites("A" * 20 + "TGGAGG"))         # [20, 23]
-print(find_pam_sites("TGG" + "A" * 20 + "TGG"))    # [23]  (the first TGG has no room)
-print(find_pam_sites("AGGTGG"))                    # []    (too short)
+test = "ACGT" * 5 + "TGG" + "A" * 20 + "AGG"
+
+for guide, score in rank_guides(test):
+    print(guide,score)
 
 if __name__ == '__main__':
     main()

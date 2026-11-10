@@ -98,10 +98,28 @@ def count_mismatches(a,b): # Compares sequences "A" and "B", and counts the no. 
             mismatches += 1
     return mismatches 
 
-# print(count_mismatches("ACGT","AC"))              
+def weighted_mismatches(a,b): # Index 0-19 works as a "target" as there are usually 20 bases next to PAM(NGG.) What this does is showos how far it is from the pam via weight.
+    if len(a) != len(b):
+        raise ValueError("The length of a should be equal to the length of b.") 
+    weighed_mismatches = 0
+    for i in range(len(a)):
+        if a[i] != b[i]:
+            if i >= 10:
+                weighed_mismatches += 2
+            else:
+                weighed_mismatches +=1
+    return weighed_mismatches
+
+
+# print(count_mismatches("ACGT","AC"))              gi
 print(count_mismatches("ACGT", "AGGT"))              # 1
 print(count_mismatches("AAAA", "TTTT"))              # 4
 print(count_mismatches("ACGTACGTAC", "ACGTTCGTAA"))  # 2
+print(weighted_mismatches("A" * 20, "A" * 20))          # 0
+print(weighted_mismatches("A" * 20, "T" + "A" * 19))    # 1
+print(weighted_mismatches("A" * 20, "A" * 19 + "T"))    # 2
+print(weighted_mismatches("A" * 20, "T" * 20))          # 30  (10 x 1 + 10 x 2)
+
 
 
 

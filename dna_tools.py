@@ -61,6 +61,21 @@ def find_all_guides(seq):
     forward =find_guides(seq)
     reverse = find_guides(reverse_complement(seq))
     return forward + reverse
+
+def has_homopolymer(guide):
+    guide = guide.upper()
+    for run in ["AAAA","CCCC","GGGG","TTTT"]: # TLDR This just sees if guide in run has the AAAA,CCCC,GGGG or TTTT.
+        if run in guide:
+            return True 
+    return False 
+
+def score_guide(guide):
+    score = 0
+    if not has_homopolymer(guide): # TTTT can act as a stop signal, so it can get cut short. Long G runs also can cause the guide to turn out odd, so if the guide has no run of homopolymers, to cause a mishap, it adds one as it isn't a bad run.
+        score += 1
+    if 0.4 <= gc_content(guide) <= 0.7: # If the gc content is below 40%, the bind target is weak, and if its above 70% it binds too tightly. hence, we need it within this sweet spot.
+        score +=1
+    return score 
     
 
 

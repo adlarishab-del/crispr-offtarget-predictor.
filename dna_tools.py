@@ -113,24 +113,37 @@ def weighted_mismatches(a,b): # Index 0-19 works as a "target" as there are usua
 def scan_for_matches(guide,genome,max_penalty):
     genome = genome.upper()
     hits = []
-    for i in range(len(genome) - 19):
+    for i in range(len(genome) - 22):
         window = genome[i:i+20]
+        pam = genome[i+20:i+23]
         penalty = weighted_mismatches(guide,window)
-        if penalty <= max_penalty:
+        if pam[1:3] == "GG" and penalty <= max_penalty:
             hits.append((i,penalty))
     return hits 
+
+
 
 
 guide = "A" * 20
 genome = "C" * 5 + "A" * 20 + "C" * 5
 
+g1 = "C" * 5 + "A" * 20 + "C" * 5
+print(scan_for_matches(guide, g1, 0))   # []  (perfect match but no PAM)
+g2 = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
+print(scan_for_matches(guide, g2, 0))   # [(5, 0)]
+g3 = "C" * 5 + "A" * 19 + "T" + "AGG" + "C" * 5
+print(scan_for_matches(guide, g3, 2))   # [(5, 2)]
+print(scan_for_matches(guide, g3, 1))   # []  (seed mismatch costs 2)
+
 print(scan_for_matches(guide, genome, 0))   # [(5, 0)]
 print(scan_for_matches(guide, genome, 1))   # [(4, 1), (5, 0)]
 print(scan_for_matches(guide, "AAAA", 0))   # []
+
 # print(count_mismatches("ACGT","AC"))              gi
 print(count_mismatches("ACGT", "AGGT"))              # 1
 print(count_mismatches("AAAA", "TTTT"))              # 4
 print(count_mismatches("ACGTACGTAC", "ACGTTCGTAA"))  # 2
+
 print(weighted_mismatches("A" * 20, "A" * 20))          # 0
 print(weighted_mismatches("A" * 20, "T" + "A" * 19))    # 1
 print(weighted_mismatches("A" * 20, "A" * 19 + "T"))    # 2

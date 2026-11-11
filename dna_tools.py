@@ -121,17 +121,31 @@ def scan_for_matches(guide,genome,max_penalty):
             hits.append((i,penalty))
     return hits 
 
+def scan_both_strands(guide,genome,max_penalty):
+    forward = scan_for_matches(guide,genome,max_penalty)
+    reverse = scan_for_matches(reverse_complement(guide),genome,max_penalty)
+    return forward + reverse 
+
+
+
+
 
 
 
 guide = "A" * 20
 genome = "C" * 5 + "A" * 20 + "C" * 5
-
 g1 = "C" * 5 + "A" * 20 + "C" * 5
-print(scan_for_matches(guide, g1, 0))   # []  (perfect match but no PAM)
 g2 = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
-print(scan_for_matches(guide, g2, 0))   # [(5, 0)]
 g3 = "C" * 5 + "A" * 19 + "T" + "AGG" + "C" * 5
+
+guide = "A" * 20
+fwd = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
+rev = reverse_complement(fwd)
+
+print(len(scan_both_strands(guide, fwd, 0)))   # 1
+print(len(scan_both_strands(guide, rev, 0)))   # 1
+print(scan_for_matches(guide, g1, 0))   # []  (perfect match but no PAM)
+print(scan_for_matches(guide, g2, 0))   # [(5, 0)]
 print(scan_for_matches(guide, g3, 2))   # [(5, 2)]
 print(scan_for_matches(guide, g3, 1))   # []  (seed mismatch costs 2)
 

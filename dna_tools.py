@@ -1,9 +1,10 @@
 def main():
     pass
 import pandas as pd
+with open("gene.fna") as f:
+    seq = "".join(line.strip() for line in f if not line.startswith(">"))
 
 input_sequence = "ATGCCG"
-
 pairs = {
     "A":"T",
     "C":"G",
@@ -114,11 +115,14 @@ def scan_for_matches(guide,genome,max_penalty):
     genome = genome.upper()
     hits = []
     for i in range(len(genome) - 22):
-        window = genome[i:i+20]
-        pam = genome[i+20:i+23]
-        penalty = weighted_mismatches(guide,window)
-        if pam[1:3] == "GG" and penalty <= max_penalty:
+        if genome[i+21:i+23] != "GG": # PAM check
+            continue
+        penalty = weighted_mismatches(guide,genome[i:i+20])
+        if penalty <= max_penalty:
             hits.append((i,penalty))
+    return hits 
+        
+      
     return hits 
 
 def scan_both_strands(guide,genome,max_penalty):
@@ -127,6 +131,13 @@ def scan_both_strands(guide,genome,max_penalty):
     return forward + reverse 
 
 
+with open("gene.fna") as f:
+    seq = "".join(line.strip() for line in f if not line.startswith(">"))
+print(len(seq))
+
+ranked = rank_guides(seq)
+print(len(ranked))
+print(ranked[:5])
 
 
 
@@ -142,31 +153,15 @@ guide = "A" * 20
 fwd = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
 rev = reverse_complement(fwd)
 
-print(len(scan_both_strands(guide, fwd, 0)))   # 1
-print(len(scan_both_strands(guide, rev, 0)))   # 1
-print(scan_for_matches(guide, g1, 0))   # []  (perfect match but no PAM)
-print(scan_for_matches(guide, g2, 0))   # [(5, 0)]
-print(scan_for_matches(guide, g3, 2))   # [(5, 2)]
-print(scan_for_matches(guide, g3, 1))   # []  (seed mismatch costs 2)
+print(scan_for_matches(guide, g1, 4))
+print(scan_for_matches(guide, g2, 4))
+print(scan_for_matches(guide, g3, 4))
 
-print(scan_for_matches(guide, genome, 0))   # [(5, 0)]
-print(scan_for_matches(guide, genome, 1))   # [(4, 1), (5, 0)]
-print(scan_for_matches(guide, "AAAA", 0))   # []
-
-# print(count_mismatches("ACGT","AC"))              gi
-print(count_mismatches("ACGT", "AGGT"))              # 1
-print(count_mismatches("AAAA", "TTTT"))              # 4
-print(count_mismatches("ACGTACGTAC", "ACGTTCGTAA"))  # 2
-
-print(weighted_mismatches("A" * 20, "A" * 20))          # 0
-print(weighted_mismatches("A" * 20, "T" + "A" * 19))    # 1
-print(weighted_mismatches("A" * 20, "A" * 19 + "T"))    # 2
-print(weighted_mismatches("A" * 20, "T" * 20))          # 30  (10 x 1 + 10 x 2)
-
-
-
-
-
+assert scan_for_matches(guide, g1, 4) == []
+assert scan_for_matches(guide, g2, 4) == [(5, 0)]
+assert scan_for_matches(guide, g3, 4) == [(5, 2)]
+print("scan_for_matches tests passed")
+assert scan_for_matches(guide, g3, 1) == []
 if __name__ == '__main__':
     main()
 

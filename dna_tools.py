@@ -1,5 +1,3 @@
-
-input_sequence = "ATGCCG"
 pairs = {
     "A":"T",
     "C":"G",
@@ -8,7 +6,6 @@ pairs = {
 }
 
 GUIDE_LEN = 20
-
 
 def reverse_complement(seq):
     seq = seq.upper()
@@ -21,10 +18,6 @@ def reverse_complement(seq):
         result += complement
     return result
 
-rc = reverse_complement(input_sequence)
-print("The reverse complement of this seq is:" + rc)
-
-
 def gc_content(seq):
     seq = seq.upper()
     if len(seq) == 0:
@@ -35,8 +28,6 @@ def gc_content(seq):
         if base in ["G","C"]:
             gc_count += 1
     return gc_count / len(seq)
-
-gc = gc_content(input_sequence)
 
 def find_pam_sites(seq):
     seq = seq.upper()
@@ -82,10 +73,6 @@ def rank_guides(seq):
     results.sort(key= lambda pair: pair[1], reverse = True) #after loop, runs once, lambda just is a easier way for me to return pair[1]
     return results 
 
-test = "ACGT" * 5 + "TGG" + "A" * 20 + "AGG"
-
-for guide, score in rank_guides(test):
-    print(guide,score)
 
 def count_mismatches(a,b): # Compares sequences "A" and "B", and counts the no. of mismatches between them
     if len(a) != len(b):
@@ -118,45 +105,56 @@ def scan_for_matches(guide,genome,max_penalty):
         if penalty <= max_penalty:
             hits.append((i,penalty))
     return hits 
-        
 
 def scan_both_strands(guide,genome,max_penalty):
     forward = scan_for_matches(guide,genome,max_penalty)
     reverse = scan_for_matches(guide,reverse_complement(genome),max_penalty)
     return forward + reverse 
 
-guide = "A" * 20
-genome = "C" * 5 + "A" * 20 + "C" * 5
-g1 = "C" * 5 + "A" * 20 + "C" * 5
-g2 = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
-g3 = "C" * 5 + "A" * 19 + "T" + "AGG" + "C" * 5
 
-guide = "A" * 20
-fwd = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
-rev = reverse_complement(fwd)
-
-print(scan_for_matches(guide, g1, 4))
-print(scan_for_matches(guide, g2, 4))
-print(scan_for_matches(guide, g3, 4))
-
-assert scan_for_matches(guide, g1, 4) == []
-assert scan_for_matches(guide, g2, 4) == [(5, 0)]
-assert scan_for_matches(guide, g3, 4) == [(5, 2)]
-print("scan_for_matches tests passed")
-assert scan_for_matches(guide, g3, 1) == []
 
 def main():
     with open("gene.fna") as f:
         seq = "".join(line.strip() for line in f if not line.startswith(">"))
-    print(len(seq))
+
     ranked = rank_guides(seq)
-    
-    ranked = rank_guides(seq)
-    print(len(ranked))
-    print(ranked[:5])
+    input_sequence = "ATGCCG"
 
     site = "CCA" + "T" * 20
     assert len(scan_both_strands("A" * 20, site, 0)) == 1
+
+    g1 = "C" * 5 + "A" * 20 + "C" * 5
+    g2 = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
+    g3 = "C" * 5 + "A" * 19 + "T" + "AGG" + "C" * 5
+
+    guide = "A" * 20
+    fwd = "C" * 5 + "A" * 20 + "TGG" + "C" * 5
+    rev = reverse_complement(fwd)
+    print(scan_for_matches(guide, g1, 4))
+    print(scan_for_matches(guide, g2, 4))
+    print(scan_for_matches(guide, g3, 4))
+    rc = reverse_complement(input_sequence)
+    assert scan_for_matches(guide, g1, 4) == []
+    assert scan_for_matches(guide, g2, 4) == [(5, 0)]
+    assert scan_for_matches(guide, g3, 4) == [(5, 2)]
+    print("scan_for_matches tests passed")
+    assert scan_for_matches(guide, g3, 1) == []
+    print(len(ranked))
+    print(ranked[:5])
+    print("The reverse complement of this seq is:" + rc)
+    test = "ACGT" * 5 + "TGG" + "A" * 20 + "AGG"
+    for guide, score in rank_guides(test):
+        print(guide,score)
+    print(len(seq))
+    gc = gc_content(input_sequence)
+    print(gc)
+
+
+    
+    
+
+
+
 if __name__ == '__main__':
     main()
 

@@ -1,8 +1,3 @@
-def main():
-    pass
-import pandas as pd
-with open("gene.fna") as f:
-    seq = "".join(line.strip() for line in f if not line.startswith(">"))
 
 input_sequence = "ATGCCG"
 pairs = {
@@ -117,7 +112,7 @@ def scan_for_matches(guide,genome,max_penalty):
     genome = genome.upper()
     hits = []
     for i in range(len(genome) - GUIDE_LEN):
-        if genome[i+GUIDE_LEN:i+GUIDE_LEN + 3] != "GG": # PAM check
+        if genome[i+GUIDE_LEN+1:i+GUIDE_LEN + 3] != "GG": # PAM check
             continue
         penalty = weighted_mismatches(guide,genome[i:i+GUIDE_LEN])
         if penalty <= max_penalty:
@@ -127,21 +122,8 @@ def scan_for_matches(guide,genome,max_penalty):
 
 def scan_both_strands(guide,genome,max_penalty):
     forward = scan_for_matches(guide,genome,max_penalty)
-    reverse = scan_for_matches(reverse_complement(genome),guide,max_penalty)
+    reverse = scan_for_matches(guide,reverse_complement(genome),max_penalty)
     return forward + reverse 
-
-
-with open("gene.fna") as f:
-    seq = "".join(line.strip() for line in f if not line.startswith(">"))
-print(len(seq))
-
-ranked = rank_guides(seq)
-print(len(ranked))
-print(ranked[:5])
-
-
-
-
 
 guide = "A" * 20
 genome = "C" * 5 + "A" * 20 + "C" * 5
@@ -162,6 +144,19 @@ assert scan_for_matches(guide, g2, 4) == [(5, 0)]
 assert scan_for_matches(guide, g3, 4) == [(5, 2)]
 print("scan_for_matches tests passed")
 assert scan_for_matches(guide, g3, 1) == []
+
+def main():
+    with open("gene.fna") as f:
+        seq = "".join(line.strip() for line in f if not line.startswith(">"))
+    print(len(seq))
+    ranked = rank_guides(seq)
+    
+    ranked = rank_guides(seq)
+    print(len(ranked))
+    print(ranked[:5])
+
+    site = "CCA" + "T" * 20
+    assert len(scan_both_strands("A" * 20, site, 0)) == 1
 if __name__ == '__main__':
     main()
 

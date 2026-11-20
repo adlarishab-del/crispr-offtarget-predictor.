@@ -111,11 +111,40 @@ def scan_both_strands(guide,genome,max_penalty):
     reverse = scan_for_matches(guide,reverse_complement(genome),max_penalty)
     return forward + reverse 
 
+GENE_CHROM = "chr2"
+GENE_START = 72916189
+
+def window_to_genome(i):
+    start = GENE_START + i - 1 
+    end = start + GUIDE_LEN
+    return (GENE_CHROM,start,end)
+
+def reverse_window_to_genome(j,seq_len):
+    forward_i = seq_len - j - GUIDE_LEN #  # j = position of a hit found in the FLIPPED copy of the gene (reverse_complement(seq)).
+    return window_to_genome(forward_i)
+
+def scan_for_genomic(guide,seq,max_penalty):
+    results = []
+    for i, penalty in scan_for_matches(guide,seq,max_penalty):
+        chrom, start, end = window_to_genome(i)
+        results.append((chrom,start,end,"+",penalty))
+    for j, penalty in scan_for_matches(guide,reverse_complement(seq),max_penalty):
+        chrom,start,end = reverse_window_to_genome(j,len(seq))
+        results.append((chrom,start,end,"-",penalty))
+    return results 
+
+
+
+
+
 
 
 def main():
     with open("gene.fna") as f:
         seq = "".join(line.strip() for line in f if not line.startswith(">"))
+
+    assert reverse_window_to_genome(0, 18703) == ("chr2", 72934871, 72934891)
+    assert reverse_window_to_genome(18683, 18703) == ("chr2", 72916188, 72916208)
 
     ranked = rank_guides(seq)
     input_sequence = "ATGCCG"
@@ -149,10 +178,12 @@ def main():
     gc = gc_content(input_sequence)
     print(gc)
 
+    fwd_site = "C" * 5 + "A" * GUIDE_LEN + "TGG" + "C" * 5
+    assert scan_for_genomic("A" * GUIDE_LEN, fwd_site, 0) == [("chr2", 72916193, 72916213, "+", 0)]
 
-    
-    
-
+    rev_site = "CCA" + "T" * GUIDE_LEN
+    assert scan_for_genomic("A" * GUIDE_LEN, rev_site, 0) == [("chr2", 72916191, 72916211, "-", 0)]
+print("scan_genomic tests passed")
 
 
 if __name__ == '__main__':

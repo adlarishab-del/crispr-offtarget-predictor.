@@ -12,6 +12,8 @@ pairs = {
     "T":"A"
 }
 
+GUIDE_LEN = 20
+
 
 def reverse_complement(seq):
     seq = seq.upper()
@@ -44,7 +46,7 @@ gc = gc_content(input_sequence)
 def find_pam_sites(seq):
     seq = seq.upper()
     sites = []
-    for i in range(20, len(seq) - 2): # 20 is always used is because the guide RNA cas9 uses is always 20 letters long.
+    for i in range(GUIDE_LEN, len(seq) - 2): # 20 is always used is because the guide RNA cas9 uses is always 20 letters long.
         chunk = seq[i:i+3]
         if chunk.endswith("GG"):
             sites.append(i)
@@ -54,7 +56,7 @@ def find_guides(seq):
     seq = seq.upper()
     guides = []
     for i in find_pam_sites(seq):
-        guide = (seq[i-20:i])
+        guide = (seq[i-GUIDE_LEN:i])
         guides.append(guide)
     return guides 
 
@@ -114,20 +116,18 @@ def weighted_mismatches(a,b): # Index 0-19 works as a "target" as there are usua
 def scan_for_matches(guide,genome,max_penalty):
     genome = genome.upper()
     hits = []
-    for i in range(len(genome) - 22):
-        if genome[i+21:i+23] != "GG": # PAM check
+    for i in range(len(genome) - GUIDE_LEN):
+        if genome[i+GUIDE_LEN:i+GUIDE_LEN + 3] != "GG": # PAM check
             continue
-        penalty = weighted_mismatches(guide,genome[i:i+20])
+        penalty = weighted_mismatches(guide,genome[i:i+GUIDE_LEN])
         if penalty <= max_penalty:
             hits.append((i,penalty))
     return hits 
         
-      
-    return hits 
 
 def scan_both_strands(guide,genome,max_penalty):
     forward = scan_for_matches(guide,genome,max_penalty)
-    reverse = scan_for_matches(reverse_complement(guide),genome,max_penalty)
+    reverse = scan_for_matches(reverse_complement(genome),guide,max_penalty)
     return forward + reverse 
 
 

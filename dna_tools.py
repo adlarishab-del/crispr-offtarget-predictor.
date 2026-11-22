@@ -142,6 +142,14 @@ def load_peaks(path):
                 continue
             peaks.append((parts[0],int(parts[1]),int(parts[2])))
     return peaks 
+   # Reads a BED peaks file (one open-chromatin region per line: chrom, start, end)
+    # returns a list of (chrom, start, end) tuples, with start/end as ints.
+
+def overlaps_peak(chrom,start,end,peaks):
+    for p_chrom,p_start,p_end in peaks:
+        if chrom == p_chrom and start < p_end and end > p_start:
+            return True
+    return False 
 
         
         
@@ -158,6 +166,14 @@ def main():
 
     assert reverse_window_to_genome(0, 18703) == ("chr2", 72934871, 72934891)
     assert reverse_window_to_genome(18683, 18703) == ("chr2", 72916188, 72916208)
+
+    peaks = load_peaks("toy_peaks.bed")
+    assert overlaps_peak("chr2", 150, 170, peaks) == True
+    assert overlaps_peak("chr2", 190, 250, peaks) == True
+    assert overlaps_peak("chr2", 200, 300, peaks) == False
+    assert overlaps_peak("chr2", 300, 400, peaks) == False
+    assert overlaps_peak("chr4", 150, 170, peaks) == False
+    print("overlaps_peak tests passed")
 
     assert load_peaks("toy_peaks.bed") == [("chr2", 100, 200), ("chr2", 500, 600), ("chr3", 50, 80)]
     print("load_peaks test passed")

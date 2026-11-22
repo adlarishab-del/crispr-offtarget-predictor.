@@ -123,7 +123,7 @@ def reverse_window_to_genome(j,seq_len):
     forward_i = seq_len - j - GUIDE_LEN #  # j = position of a hit found in the FLIPPED copy of the gene (reverse_complement(seq)).
     return window_to_genome(forward_i)
 
-def scan_for_genomic(guide,seq,max_penalty):
+def scan_for_genomic(guide,seq,max_penalty): # Scan both strands, return hits as (chrom, start, end, strand, penalty) in genome coordinates.
     results = []
     for i, penalty in scan_for_matches(guide,seq,max_penalty):
         chrom, start, end = window_to_genome(i)
@@ -132,6 +132,19 @@ def scan_for_genomic(guide,seq,max_penalty):
         chrom,start,end = reverse_window_to_genome(j,len(seq))
         results.append((chrom,start,end,"-",penalty))
     return results 
+
+def load_peaks(path):
+    peaks = []
+    with open(path) as f:
+        for line in f:
+            parts = line.split()
+            if not parts:
+                continue
+            peaks.append((parts[0],int(parts[1]),int(parts[2])))
+    return peaks 
+
+        
+        
 
 
 
@@ -145,6 +158,9 @@ def main():
 
     assert reverse_window_to_genome(0, 18703) == ("chr2", 72934871, 72934891)
     assert reverse_window_to_genome(18683, 18703) == ("chr2", 72916188, 72916208)
+
+    assert load_peaks("toy_peaks.bed") == [("chr2", 100, 200), ("chr2", 500, 600), ("chr3", 50, 80)]
+    print("load_peaks test passed")
 
     ranked = rank_guides(seq)
     input_sequence = "ATGCCG"

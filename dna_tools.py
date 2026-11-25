@@ -162,6 +162,13 @@ def annotate_hits(hits,peaks):
         annotations.append((chrom,start,end,strand,penalty,is_open))
     return annotations
 
+def hit_risk(penalty,is_open):
+    risk = 1/(1 + penalty)
+    if not is_open:
+        risk = risk*0.5  # closed chromatin: harder for Cas9 to reach, so halve it
+    return risk
+
+
 
 
 
@@ -237,6 +244,12 @@ def main():
     assert scan_for_genomic("A" * GUIDE_LEN, rev_site, 0) == [("chr2", 72916191, 72916211, "-", 0)]
 print("scan_genomic tests passed")
 
+assert hit_risk(0, True) == 1.0
+assert hit_risk(1, True) == 0.5
+assert hit_risk(1, False) == 0.25
+assert hit_risk(3, True) == 0.25
+assert hit_risk(3, False) == 0.125
+print("hit_risk tests passed")
 
 if __name__ == '__main__':
     main()

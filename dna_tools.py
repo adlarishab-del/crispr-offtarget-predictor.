@@ -149,7 +149,21 @@ def overlaps_peak(chrom,start,end,peaks):
     for p_chrom,p_start,p_end in peaks:
         if chrom == p_chrom and start < p_end and end > p_start:
             return True
-    return False 
+    return False
+# Returns True if the window (chrom, start, end) overlaps any open-chromatin peak.
+    # peaks = list of (chrom, start, end) tuples from load_peaks().
+    # Two regions overlap when they're on the same chromosome AND each one starts
+    # before the other ends:  window start < peak end  and  window end > peak start.
+
+def annotate_hits(hits,peaks):
+    annotations = []
+    for chrom,start,end,strand,penalty in hits:
+        is_open = overlaps_peak(chrom,start,end,peaks)
+        annotations.append((chrom,start,end,strand,penalty,is_open))
+    return annotations
+
+
+
 
         
         
@@ -163,6 +177,12 @@ def overlaps_peak(chrom,start,end,peaks):
 def main():
     with open("gene.fna") as f:
         seq = "".join(line.strip() for line in f if not line.startswith(">"))
+    peaks = [("chr2", 72916000, 72916200)]
+    hits = [("chr2", 72916193, 72916213, "+", 0),
+        ("chr2", 72920000, 72920020, "-", 2)]
+    assert annotate_hits(hits, peaks) == [("chr2", 72916193, 72916213, "+", 0, True),
+                                      ("chr2", 72920000, 72920020, "-", 2, False)]
+    print("annotate_hits test passed")
 
     assert reverse_window_to_genome(0, 18703) == ("chr2", 72934871, 72934891)
     assert reverse_window_to_genome(18683, 18703) == ("chr2", 72916188, 72916208)

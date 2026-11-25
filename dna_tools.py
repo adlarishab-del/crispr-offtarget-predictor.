@@ -168,6 +168,14 @@ def hit_risk(penalty,is_open):
         risk = risk*0.5  # closed chromatin: harder for Cas9 to reach, so halve it
     return risk
 
+def offtarget_risk(guide,seq,peaks,max_penalty):
+    hits = annotate_hits(scan_for_genomic(guide,seq,max_penalty),peaks)
+    total = 0
+    for chrom,start,end,strand,penalty,is_open in hits:
+        if penalty > 0:
+            total += 1
+    return total 
+
 
 
 

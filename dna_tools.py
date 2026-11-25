@@ -173,8 +173,18 @@ def offtarget_risk(guide,seq,peaks,max_penalty):
     total = 0
     for chrom,start,end,strand,penalty,is_open in hits:
         if penalty > 0:
-            total += 1
+            total += hit_risk(penalty,is_open) # Sum hit_risk() over every off-target (penalty > 0) found on both strands: close matches in open chromatin add the most risk, closed sites are halved.
     return total 
+
+def rank_by_risk(seq,peaks,max_penalty,top_n):
+    ranked = rank_guides(seq)[:top_n]
+    results = []
+    for guide, score in ranked:
+        results.append((guide,score,offtarget_risk(guide, seq, peaks, max_penalty)))
+    results.sort(key=lambda r: (-r[1],r[2]))
+    return results
+
+
 
 
 
@@ -196,7 +206,7 @@ def main():
     hits = [("chr2", 72916193, 72916213, "+", 0),
         ("chr2", 72920000, 72920020, "-", 2)]
     assert annotate_hits(hits, peaks) == [("chr2", 72916193, 72916213, "+", 0, True),
-                                      ("chr2", 72920000, 72920020, "-", 2, False)]
+                                       ("chr2", 72920000, 72920020, "-", 2, False)]
     print("annotate_hits test passed")
 
     assert reverse_window_to_genome(0, 18703) == ("chr2", 72934871, 72934891)
@@ -250,14 +260,24 @@ def main():
 
     rev_site = "CCA" + "T" * GUIDE_LEN
     assert scan_for_genomic("A" * GUIDE_LEN, rev_site, 0) == [("chr2", 72916191, 72916211, "-", 0)]
-print("scan_genomic tests passed")
+    print("scan_genomic tests passed")
 
-assert hit_risk(0, True) == 1.0
-assert hit_risk(1, True) == 0.5
-assert hit_risk(1, False) == 0.25
-assert hit_risk(3, True) == 0.25
-assert hit_risk(3, False) == 0.125
-print("hit_risk tests passed")
+    assert hit_risk(0, True) == 1.0
+    assert hit_risk(1, True) == 0.5
+    assert hit_risk(1, False) == 0.25
+    assert hit_risk(3, True) == 0.25
+    assert hit_risk(3, False) == 0.125
+    print("hit_risk tests passed")
+
+    results = rank_by_risk(seq, [], 3, 2)
+    for guide, score, risk in results:
+     print(guide, score, round(risk, 3))
+
+    for a, b in zip(results, results[1:]):
+        assert a[1] > b[1] or (a[1] == b[1] and a[2] <= b[2])
+    print("rank_by_risk ordering passed")
+
+
 
 if __name__ == '__main__':
     main()
